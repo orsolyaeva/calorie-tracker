@@ -2,6 +2,8 @@ import { initializeApp } from "firebase/app";
 import { createContext, useContext, useEffect, useReducer } from "react";
 import { FirebaseState, FirebaseStore } from "../utils/types";
 import { AuthProvider, getAuth, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signInWithRedirect, signOut } from "firebase/auth";
+import axios from 'axios';
+import {API_LOGIN} from "../utils/constants";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBKKPra9Nx7ehYaJjXrWJtwynshDMf-TBM",
@@ -78,14 +80,25 @@ export const useFirebaseState = () : FirebaseStore => {
                 const credential = GoogleAuthProvider.credentialFromResult(result);
                 console.log(credential);
                 const accessToken = credential?.accessToken;
-                localStorage.setItem('accessToken', accessToken || '');
+
+                if (accessToken) {
+                    const response = await axios.post(API_LOGIN, {
+                        accessToken,
+                        email: result.user?.email
+                    })
+                }
+
                 dispatch({type: FIREBASE_ACTIONS.SIGN_IN, payload: {user: result.user, accessToken}});
             }
         })();
         onAuthStateChanged(state.auth, (user) => {
             if (user && !state.user) {
                 console.log('You are logged in!');
-                dispatch({type: FIREBASE_ACTIONS.SIGN_IN, payload: {user: user, accessToken: localStorage.getItem('accessToken')}});
+                (async () => {
+                    const accessToken = (await axios.get(`${API_LOGIN}/${user.email}`)).data.accessToken;
+                    console.log(accessToken);
+                    dispatch({type: FIREBASE_ACTIONS.SIGN_IN, payload: {user: user, accessToken: accessToken}});
+                })();
             }
         });
     }, []);
