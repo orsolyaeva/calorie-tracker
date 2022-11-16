@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import { FIREBASE_ACTIONS, useFirebaseContext } from '../hooks/useFirebase';
+import { useFirebaseContext } from '../hooks/useFirebase';
 import styles from '../styles/Home.module.css'
 import { useEffect, useState } from 'react';
 import {ClipLoader} from "react-spinners";
@@ -40,7 +40,10 @@ const Home = () => {
         const result = await steps.json();
         if (result) {
           console.log(result);
-          setSteps(result.bucket[0].dataset[0].point.reduce((prev: any, curr: { value: { intVal: any; }[]; }) => prev + curr.value[0].intVal, 0));
+
+          if(result.bucket) {
+              setSteps(result.bucket[0].dataset[0].point.reduce((prev: any, curr: { value: { intVal: any; }[]; }) => prev + curr.value[0].intVal, 0));
+          }
           setLoading(false);
         }
       })();
