@@ -26,7 +26,7 @@ const StepTrackerPanel: FC = () => {
                 <div className={'flex flex-col basis-1/2 gap-4 items-start justify-start'}>
                     <DataWithIcon icon={'🏁'} title={'0.7km'} subTitle={'Distance'} />
                     <DataWithIcon icon={'⏰'} title={'1h 3m'} subTitle={'Time spent'} />
-                    <DataWithIcon icon={'🔥'} title={'0.7km'} subTitle={'Calories'} />
+                    <DataWithIcon icon={'🔥'} title={'240 Cal'} subTitle={'Calories'} />
                 </div>
             </div>
         </InformationPanel>

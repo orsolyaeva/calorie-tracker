@@ -12,7 +12,7 @@ const Dropdown: FC<DropdownProps> = ({ clickableElement, children, align = 'left
                 {clickableElement}
             </button>
             <div
-                className={`absolute flex flex-col w-max p-3 mt-4 border-[1px] rounded-xl ${
+                className={`absolute flex flex-col w-max p-3 mt-4 border-[1px] bg-white rounded-xl ${
                     isOpen ? 'block' : 'hidden'
                 } ${align === 'left' ? 'left-0' : 'right-0 items-end'} ${style.dropdownChildren}`}
             >
