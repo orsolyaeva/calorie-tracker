@@ -11,7 +11,7 @@ import {
     signOut,
 } from 'firebase/auth'
 import axios from 'axios'
-import { API_LOGIN } from '../utils/constants'
+import { API_LOGIN, API_WATER_INTAKE } from '../utils/constants'
 
 const firebaseConfig = {
     apiKey: 'AIzaSyBKKPra9Nx7ehYaJjXrWJtwynshDMf-TBM',
@@ -28,7 +28,8 @@ export const FIREBASE_ACTIONS = {
     SET_USER: 'SET_USER',
     SIGN_OUT: 'SIGN_OUT',
     SIGN_IN: 'SIGN_IN',
-    SET_STEPS: 'SET_STEPS',
+    SET_GOOGLE_DATA: 'SET_GOOGLE_DATA',
+    SET_WATER_INTAKE: 'SET_WATER_INTAKE',
 }
 
 export const firebaseReducer = (state: FirebaseState, action: any) => {
@@ -55,10 +56,15 @@ export const firebaseReducer = (state: FirebaseState, action: any) => {
                 user: action.payload.user,
                 accessToken: action.payload.accessToken,
             }
-        case FIREBASE_ACTIONS.SET_STEPS:
+        case FIREBASE_ACTIONS.SET_GOOGLE_DATA:
             return {
                 ...state,
-                steps: action.payload,
+                googleData: action.payload,
+            }
+        case FIREBASE_ACTIONS.SET_WATER_INTAKE:
+            return {
+                ...state,
+                waterIntake: action.payload,
             }
         default:
             return state
@@ -75,6 +81,9 @@ export const FirebaseContext = createContext<FirebaseStore>({
 const getAuthProviderWithScopes = (): AuthProvider => {
     const provider = new GoogleAuthProvider()
     provider.addScope('https://www.googleapis.com/auth/fitness.activity.read')
+    provider.addScope('https://www.googleapis.com/auth/fitness.body.read')
+    provider.addScope('https://www.googleapis.com/auth/fitness.location.read')
+    provider.addScope('https://www.googleapis.com/auth/fitness.nutrition.read')
     return provider
 }
 
@@ -85,7 +94,8 @@ export const useFirebaseState = (): FirebaseStore => {
         auth: getAuth(),
         user: null,
         accessToken: null,
-        steps: 0,
+        googleData: {},
+        waterIntake: 0,
     })
 
     useEffect(() => {
@@ -113,6 +123,33 @@ export const useFirebaseState = (): FirebaseStore => {
                     const accessToken = (await axios.get(`${API_LOGIN}/${user.email}`)).data.accessToken
                     console.log(accessToken)
                     dispatch({ type: FIREBASE_ACTIONS.SIGN_IN, payload: { user: user, accessToken: accessToken } })
+                    try {
+                        const waterIntake = (
+                            await axios.post(`${API_WATER_INTAKE}`, {
+                                startTime: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
+                                endTime: new Date(new Date().getTime()).toISOString(),
+                            })
+                        ).data
+                        if (waterIntake.length) {
+                            const totalAmount = waterIntake.reduce((acc: number, curr: any) => acc + curr.amount, 0)
+                            if (totalAmount < 0) {
+                                dispatch({
+                                    type: FIREBASE_ACTIONS.SET_WATER_INTAKE,
+                                    payload: 0,
+                                })
+                            } else {
+                                dispatch({
+                                    type: FIREBASE_ACTIONS.SET_WATER_INTAKE,
+                                    payload: totalAmount,
+                                })
+                            }
+                        }
+                    } catch (e) {
+                        dispatch({
+                            type: FIREBASE_ACTIONS.SET_WATER_INTAKE,
+                            payload: 0,
+                        })
+                    }
                 })()
             }
         })
@@ -136,6 +173,15 @@ export const useFirebaseState = (): FirebaseStore => {
                                 dataSourceId:
                                     'derived:com.google.step_count.delta:com.google.android.gms:estimated_steps',
                             },
+                            {
+                                dataTypeName: 'com.google.distance.delta',
+                            },
+                            {
+                                dataTypeName: 'com.google.calories.expended',
+                            },
+                            {
+                                dataTypeName: 'com.google.active_minutes',
+                            },
                         ],
                         bucketByTime: {
                             period: {
@@ -152,11 +198,25 @@ export const useFirebaseState = (): FirebaseStore => {
 
                     if (result.bucket) {
                         dispatch({
-                            type: FIREBASE_ACTIONS.SET_STEPS,
-                            payload: result.bucket[0].dataset[0].point.reduce(
-                                (prev: any, curr: { value: { intVal: any }[] }) => prev + curr.value[0].intVal,
-                                0
-                            ),
+                            type: FIREBASE_ACTIONS.SET_GOOGLE_DATA,
+                            payload: {
+                                steps: result.bucket[0].dataset[0].point.reduce(
+                                    (prev: any, curr: { value: { intVal: any }[] }) => prev + curr.value[0].intVal,
+                                    0
+                                ),
+                                distance: result.bucket[0].dataset[1].point.reduce(
+                                    (prev: any, curr: { value: { fpVal: any }[] }) => prev + curr.value[0].fpVal,
+                                    0
+                                ),
+                                calories: result.bucket[0].dataset[2].point.reduce(
+                                    (prev: any, curr: { value: { fpVal: any }[] }) => prev + curr.value[0].fpVal,
+                                    0
+                                ),
+                                activeMinutes: result.bucket[0].dataset[3].point.reduce(
+                                    (prev: any, curr: { value: { intVal: any }[] }) => prev + curr.value[0].intVal,
+                                    0
+                                ),
+                            },
                         })
                     }
                 }

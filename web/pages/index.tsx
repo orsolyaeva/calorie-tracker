@@ -21,51 +21,6 @@ const Home = () => {
     const [steps, setSteps] = useState<number>(0)
     const [loading, setLoading] = useState<boolean>(true)
 
-    useEffect(() => {
-        if (firebase.accessToken) {
-            ;(async () => {
-                const steps = await fetch('https://fitness.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${firebase.accessToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        startTimeMillis: new Date().setHours(0, 0, 0, 0),
-                        endTimeMillis: new Date().getTime(),
-                        aggregateBy: [
-                            {
-                                dataTypeName: 'com.google.step_count',
-                                dataSourceId:
-                                    'derived:com.google.step_count.delta:com.google.android.gms:estimated_steps',
-                            },
-                        ],
-                        bucketByTime: {
-                            period: {
-                                type: 'day',
-                                value: 1,
-                                timeZoneId: 'Europe/Bucharest',
-                            },
-                        },
-                    }),
-                })
-                const result = await steps.json()
-                if (result) {
-                    console.log(result)
-
-                    if (result.bucket) {
-                        setSteps(
-                            result.bucket[0].dataset[0].point.reduce(
-                                (prev: any, curr: { value: { intVal: any }[] }) => prev + curr.value[0].intVal,
-                                0
-                            )
-                        )
-                    }
-                    setLoading(false)
-                }
-            })()
-        }
-    }, [firebase.accessToken])
     return (
         <div>
             <Head>
@@ -77,7 +32,7 @@ const Home = () => {
             <main>
                 <DashboardLayout>
                     <SideColumn>
-                        <StepTrackerPanel />
+                        {firebase.googleData.steps ? <StepTrackerPanel /> : null}
                         <WaterIntakePanel />
                     </SideColumn>
                     <MainColumn>

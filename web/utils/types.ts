@@ -7,7 +7,8 @@ export type FirebaseState = {
     auth: Auth
     user: any
     accessToken: OAuthCredential | null
-    steps: number
+    googleData: Record<string, number>
+    waterIntake: number
 }
 
 export type FirebaseStore = {
