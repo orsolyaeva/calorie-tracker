@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { createContext, useContext, useEffect, useReducer } from 'react'
+import { createContext, useContext, useEffect, useReducer, useState } from 'react'
 import { FirebaseState, FirebaseStore } from '../utils/types'
 import {
     AuthProvider,
@@ -11,16 +11,19 @@ import {
     signOut,
 } from 'firebase/auth'
 import axios from 'axios'
-import { API_LOGIN, API_WATER_INTAKE } from '../utils/constants'
+import { API_LOGIN, FieldOptions } from '../utils/constants'
+import { GetWaterIntakeForInterval } from '../services/WaterIntakeService'
+import { GetGoogleData } from '../services/GoogleDataService'
+import { useRouter } from 'next/router'
 
 const firebaseConfig = {
-    apiKey: 'AIzaSyBKKPra9Nx7ehYaJjXrWJtwynshDMf-TBM',
-    authDomain: 'titanium-diode-366714.firebaseapp.com',
-    projectId: 'titanium-diode-366714',
-    storageBucket: 'titanium-diode-366714.appspot.com',
-    messagingSenderId: '600019112902',
-    appId: '1:600019112902:web:2fe950a9267cd40c3298c7',
-    measurementId: 'G-S1ZH9XKQJ0',
+    apiKey: 'AIzaSyBiqFtmPYr_SGc6pCx5dggo0PoxTWE1Qmk',
+    authDomain: 'bethlen-gabor-project.firebaseapp.com',
+    projectId: 'bethlen-gabor-project',
+    storageBucket: 'bethlen-gabor-project.appspot.com',
+    messagingSenderId: '199798616143',
+    appId: '1:199798616143:web:7c7b7d20f30a4290483a3a',
+    measurementId: 'G-KB1B1LX7BW',
 }
 
 export const FIREBASE_ACTIONS = {
@@ -30,6 +33,7 @@ export const FIREBASE_ACTIONS = {
     SIGN_IN: 'SIGN_IN',
     SET_GOOGLE_DATA: 'SET_GOOGLE_DATA',
     SET_WATER_INTAKE: 'SET_WATER_INTAKE',
+    SET_IS_LOADING: 'SET_IS_LOADING',
 }
 
 export const firebaseReducer = (state: FirebaseState, action: any) => {
@@ -49,12 +53,14 @@ export const firebaseReducer = (state: FirebaseState, action: any) => {
                 ...state,
                 user: null,
                 accessToken: null,
+                isLoading: false,
             }
         case FIREBASE_ACTIONS.SIGN_IN:
             return {
                 ...state,
                 user: action.payload.user,
                 accessToken: action.payload.accessToken,
+                isLoading: false,
             }
         case FIREBASE_ACTIONS.SET_GOOGLE_DATA:
             return {
@@ -66,6 +72,11 @@ export const firebaseReducer = (state: FirebaseState, action: any) => {
                 ...state,
                 waterIntake: action.payload,
             }
+        case FIREBASE_ACTIONS.SET_IS_LOADING:
+            return {
+                ...state,
+                isLoading: action.payload,
+            }
         default:
             return state
     }
@@ -73,9 +84,12 @@ export const firebaseReducer = (state: FirebaseState, action: any) => {
 
 export const FirebaseContext = createContext<FirebaseStore>({
     state: {} as FirebaseState,
+    isLoaded: false,
     dispatch: () => {},
     login: () => {},
     logout: () => {},
+    refetch: () => {},
+    refetchAll: () => {},
 })
 
 const getAuthProviderWithScopes = (): AuthProvider => {
@@ -96,14 +110,16 @@ export const useFirebaseState = (): FirebaseStore => {
         accessToken: null,
         googleData: {},
         waterIntake: 0,
+        isLoading: true,
     })
+    const [isLoaded, setIsLoaded] = useState(false)
+    const router = useRouter()
 
     useEffect(() => {
         ;(async () => {
             const result = await getRedirectResult(state.auth)
             if (result) {
                 const credential = GoogleAuthProvider.credentialFromResult(result)
-                console.log(credential)
                 const accessToken = credential?.accessToken
 
                 if (accessToken) {
@@ -111,117 +127,61 @@ export const useFirebaseState = (): FirebaseStore => {
                         accessToken,
                         email: result.user?.email,
                     })
+
+                    const user = response.data
+                    const combinedUser = { ...user, photoURL: user.photoURL }
+
+                    if (!user.finishedOnboarding) {
+                        dispatch({ type: FIREBASE_ACTIONS.SET_USER, payload: combinedUser })
+                        router.push('/onboarding')
+                        return
+                    }
                 }
 
-                dispatch({ type: FIREBASE_ACTIONS.SIGN_IN, payload: { user: result.user, accessToken } })
+                router.push('/dashboard')
+
+                // dispatch({ type: FIREBASE_ACTIONS.SIGN_IN, payload: { user: result.user, accessToken } })
             }
         })()
-        onAuthStateChanged(state.auth, (user) => {
-            if (user && !state.user) {
-                console.log('You are logged in!')
-                ;(async () => {
-                    const accessToken = (await axios.get(`${API_LOGIN}/${user.email}`)).data.accessToken
-                    console.log(accessToken)
-                    dispatch({ type: FIREBASE_ACTIONS.SIGN_IN, payload: { user: user, accessToken: accessToken } })
-                    try {
-                        const waterIntake = (
-                            await axios.post(`${API_WATER_INTAKE}`, {
-                                startTime: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
-                                endTime: new Date(new Date().getTime()).toISOString(),
-                            })
-                        ).data
-                        if (waterIntake.length) {
-                            const totalAmount = waterIntake.reduce((acc: number, curr: any) => acc + curr.amount, 0)
-                            if (totalAmount < 0) {
-                                dispatch({
-                                    type: FIREBASE_ACTIONS.SET_WATER_INTAKE,
-                                    payload: 0,
-                                })
-                            } else {
-                                dispatch({
-                                    type: FIREBASE_ACTIONS.SET_WATER_INTAKE,
-                                    payload: totalAmount,
-                                })
-                            }
-                        }
-                    } catch (e) {
-                        dispatch({
-                            type: FIREBASE_ACTIONS.SET_WATER_INTAKE,
-                            payload: 0,
-                        })
-                    }
-                })()
-            }
-        })
     }, [])
 
-    useEffect(() => {
-        if (state.accessToken) {
+    onAuthStateChanged(state.auth, (user) => {
+        if (user && !state.user) {
+            console.log('You are logged in!')
             ;(async () => {
-                const steps = await fetch('https://fitness.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${state.accessToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        startTimeMillis: new Date().setHours(0, 0, 0, 0),
-                        endTimeMillis: new Date().getTime(),
-                        aggregateBy: [
-                            {
-                                dataTypeName: 'com.google.step_count',
-                                dataSourceId:
-                                    'derived:com.google.step_count.delta:com.google.android.gms:estimated_steps',
-                            },
-                            {
-                                dataTypeName: 'com.google.distance.delta',
-                            },
-                            {
-                                dataTypeName: 'com.google.calories.expended',
-                            },
-                            {
-                                dataTypeName: 'com.google.active_minutes',
-                            },
-                        ],
-                        bucketByTime: {
-                            period: {
-                                type: 'day',
-                                value: 1,
-                                timeZoneId: 'Europe/Bucharest',
-                            },
-                        },
-                    }),
-                })
-                const result = await steps.json()
-                if (result) {
-                    console.log(result)
-
-                    if (result.bucket) {
-                        dispatch({
-                            type: FIREBASE_ACTIONS.SET_GOOGLE_DATA,
-                            payload: {
-                                steps: result.bucket[0].dataset[0].point.reduce(
-                                    (prev: any, curr: { value: { intVal: any }[] }) => prev + curr.value[0].intVal,
-                                    0
-                                ),
-                                distance: result.bucket[0].dataset[1].point.reduce(
-                                    (prev: any, curr: { value: { fpVal: any }[] }) => prev + curr.value[0].fpVal,
-                                    0
-                                ),
-                                calories: result.bucket[0].dataset[2].point.reduce(
-                                    (prev: any, curr: { value: { fpVal: any }[] }) => prev + curr.value[0].fpVal,
-                                    0
-                                ),
-                                activeMinutes: result.bucket[0].dataset[3].point.reduce(
-                                    (prev: any, curr: { value: { intVal: any }[] }) => prev + curr.value[0].intVal,
-                                    0
-                                ),
-                            },
-                        })
-                    }
+                const data = (await axios.get(`${API_LOGIN}/${user.email}`)).data
+                const accessToken = data.accessToken
+                const combinedUser = { ...data, photoURL: user.photoURL }
+                if (!combinedUser.finishedOnboarding) {
+                    dispatch({ type: FIREBASE_ACTIONS.SET_USER, payload: combinedUser })
+                    router.push('/onboarding')
+                    return
                 }
+                dispatch({ type: FIREBASE_ACTIONS.SIGN_IN, payload: { user: combinedUser, accessToken: accessToken } })
             })()
+        } else if (!user) {
+            dispatch({ type: FIREBASE_ACTIONS.SET_IS_LOADING, payload: false })
         }
+    })
+
+    useEffect(() => {
+        if (!state.accessToken) return
+        ;(async () => {
+            const startDate = new Date()
+            startDate.setHours(0, 0, 0, 0)
+            const endDate = new Date()
+
+            try {
+                const googleData = await GetGoogleData(startDate, endDate, state.accessToken)
+                dispatch({ type: FIREBASE_ACTIONS.SET_GOOGLE_DATA, payload: googleData })
+            } catch (e) {
+                logout()
+            }
+            const waterIntake = await GetWaterIntakeForInterval(startDate, endDate)
+            dispatch({ type: FIREBASE_ACTIONS.SET_WATER_INTAKE, payload: waterIntake })
+
+            setIsLoaded(true)
+        })()
     }, [state.accessToken])
 
     const login = async () => {
@@ -235,12 +195,49 @@ export const useFirebaseState = (): FirebaseStore => {
         } catch (e) {}
     }
 
-    return { state, dispatch, login, logout }
+    const refetch = async (field: FieldOptions) => {
+        if (!state.accessToken) return
+        const startDate = new Date()
+        startDate.setHours(0, 0, 0, 0)
+        const endDate = new Date()
+        if (field === FieldOptions.WaterIntake) {
+            const waterIntake = await GetWaterIntakeForInterval(startDate, endDate)
+            dispatch({ type: FIREBASE_ACTIONS.SET_WATER_INTAKE, payload: waterIntake })
+        } else if (field === FieldOptions.GoogleData) {
+            try {
+                const googleData = await GetGoogleData(startDate, endDate, state.accessToken)
+                dispatch({ type: FIREBASE_ACTIONS.SET_GOOGLE_DATA, payload: googleData })
+            } catch (e) {
+                logout()
+            }
+        }
+    }
+
+    const refetchAll = async () => {
+        if (!state.accessToken) return
+        const startDate = new Date()
+        startDate.setHours(0, 0, 0, 0)
+        const endDate = new Date()
+        try {
+            const googleData = await GetGoogleData(startDate, endDate, state.accessToken)
+            dispatch({ type: FIREBASE_ACTIONS.SET_GOOGLE_DATA, payload: googleData })
+        } catch (e) {
+            logout()
+        }
+        const waterIntake = await GetWaterIntakeForInterval(startDate, endDate)
+        dispatch({ type: FIREBASE_ACTIONS.SET_WATER_INTAKE, payload: waterIntake })
+    }
+
+    return { state, dispatch, login, isLoaded, logout, refetch, refetchAll }
 }
 
 export const FirebaseContextProvider = ({ children }: any) => {
-    const { state, dispatch, login, logout } = useFirebaseState()
-    return <FirebaseContext.Provider value={{ state, dispatch, login, logout }}>{children}</FirebaseContext.Provider>
+    const { state, dispatch, login, logout, isLoaded, refetch, refetchAll } = useFirebaseState()
+    return (
+        <FirebaseContext.Provider value={{ state, dispatch, isLoaded, login, logout, refetch, refetchAll }}>
+            {children}
+        </FirebaseContext.Provider>
+    )
 }
 
 export const useFirebaseContext = () => useContext<FirebaseStore>(FirebaseContext)

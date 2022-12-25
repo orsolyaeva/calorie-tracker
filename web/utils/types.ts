@@ -1,3 +1,4 @@
+import { FieldOptions } from './constants'
 import { FirebaseApp } from 'firebase/app'
 import { Auth, AuthProvider, GoogleAuthProvider, OAuthCredential } from 'firebase/auth'
 
@@ -13,7 +14,10 @@ export type FirebaseState = {
 
 export type FirebaseStore = {
     state: FirebaseState
+    isLoaded: boolean
 
+    refetch: (field: FieldOptions) => void
+    refetchAll: () => void
     dispatch: (action: any) => void
     login: () => void
     logout: () => void
