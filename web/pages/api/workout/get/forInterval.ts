@@ -8,8 +8,12 @@ export default async function handler(
     res: NextApiResponse
 ) {
     try {
-        if (req.method === 'GET') {
-            const {startTime, endTime} = req.body
+        if (req.method === 'POST') {
+            const {startTime, endTime, userId} = req.body
+
+            if(!userId || isNaN(parseInt(userId))) {
+                return res.status(400).json({message: "Invalid user id"})
+            }
 
             if(!startTime || isNaN(Date.parse(startTime)) || new Date(startTime) > new Date() || new Date(startTime) > new Date(endTime)) {
                 return res.status(400).json({message: "Invalid start time"})
@@ -19,12 +23,26 @@ export default async function handler(
                 return res.status(400).json({message: "Invalid end time"})
             }
 
+            const user = await prisma.user.findUnique({
+                where: {
+                    id: parseInt(userId)
+                }
+            })
+
+            if(!user) {
+                return res.status(404).json({message: "User not found"})
+            }
+
             const workoutEntries = await prisma.workoutEntry.findMany({
                 where: {
+                    userId: parseInt(userId),
                     completedAt: {
                         gte: new Date(startTime),
                         lte: new Date(endTime)
                     }
+                },
+                include: {
+                    workoutCategory: true
                 }
             })
 
