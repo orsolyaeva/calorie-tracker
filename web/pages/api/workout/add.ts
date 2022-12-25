@@ -9,7 +9,7 @@ export default async function handler(
 ) {
     try {
         if (req.method === 'POST') {
-            const {name, workoutCategoryId, userId, caloriesBurned, duration} = req.body
+            const {name, workoutCategoryId, caloriesBurned, duration, userId} = req.body
 
             if(!name || name.length < 3) {
                 return res.status(400).json({message: "Invalid workout entry name"})
@@ -66,6 +66,9 @@ export default async function handler(
                     },
                     caloriesBurned: parseInt(caloriesBurned),
                     duration: parseInt(duration)
+                },
+                include: {
+                    workoutCategory: true,
                 }
             })
 
