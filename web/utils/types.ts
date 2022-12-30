@@ -10,6 +10,7 @@ export type FirebaseState = {
     accessToken: OAuthCredential | null
     googleData: Record<string, number>
     waterIntake: number
+    isLoading: boolean
 }
 
 export type FirebaseStore = {
