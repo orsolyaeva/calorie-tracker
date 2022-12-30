@@ -33,7 +33,7 @@ const StepTrackerPanel: FC = () => {
                     />
                     <DataWithIcon
                         icon={'⏰'}
-                        title={moment.duration(state.googleData.activeMinutes, 'minutes').format('hh [h] mm [m]')}
+                        title={moment.duration(state.googleData.activeMinutes, 'minutes').format('h [h] m [m]')}
                         subTitle={'Time spent'}
                     />
                     <DataWithIcon icon={'🔥'} title={`${state.googleData.calories.toFixed(2)}`} subTitle={'Calories'} />

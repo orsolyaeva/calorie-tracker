@@ -24,7 +24,7 @@ const OverviewPanel: FC = () => {
                 <div className={'flex w-full flex-col justify-center basis-4/5 gap-8 px-4 pr-2'}>
                     <div className={'flex justify-between items-center'}>
                         <div className={'text-base text-primary font-semibold'}>Calorie tracker details</div>
-                        <div className={'text-base text-wildBlue font-medium'}>Remaining = Goal- Food + Exercise</div>
+                        <div className={'text-base text-wildBlue font-medium'}>Remaining = Goal - Food + Exercise</div>
                     </div>
                     <div className={'flex flex gap-4 items-start justify-between'}>
                         <DataWithIcon icon={'🎯'} title={'1320 Cal'} subTitle={'Base Goal'} />

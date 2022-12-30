@@ -17,13 +17,13 @@ import { GetGoogleData } from '../services/GoogleDataService'
 import { useRouter } from 'next/router'
 
 const firebaseConfig = {
-    apiKey: 'AIzaSyBiqFtmPYr_SGc6pCx5dggo0PoxTWE1Qmk',
-    authDomain: 'bethlen-gabor-project.firebaseapp.com',
-    projectId: 'bethlen-gabor-project',
-    storageBucket: 'bethlen-gabor-project.appspot.com',
-    messagingSenderId: '199798616143',
-    appId: '1:199798616143:web:7c7b7d20f30a4290483a3a',
-    measurementId: 'G-KB1B1LX7BW',
+    apiKey: 'AIzaSyBKKPra9Nx7ehYaJjXrWJtwynshDMf-TBM',
+    authDomain: 'titanium-diode-366714.firebaseapp.com',
+    projectId: 'titanium-diode-366714',
+    storageBucket: 'titanium-diode-366714.appspot.com',
+    messagingSenderId: '600019112902',
+    appId: '1:600019112902:web:2fe950a9267cd40c3298c7',
+    measurementId: 'G-S1ZH9XKQJ0',
 }
 
 export const FIREBASE_ACTIONS = {
