@@ -9,6 +9,7 @@ module.exports = {
                 wildBlue: '#9BACCF',
                 stepCyan: '#01CAFF',
                 lightBlue: '#F5F7FB',
+                lightGray: '#F6F7FB',
             },
             fontFamily: {
                 sans: ['Poppins', 'Inter', 'sans-serif'],
