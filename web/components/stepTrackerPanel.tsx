@@ -4,6 +4,8 @@ import { useFirebaseContext } from '../hooks/useFirebase'
 import { CircularProgressbar, CircularProgressbarWithChildren } from 'react-circular-progressbar'
 import 'react-circular-progressbar/dist/styles.css'
 import DataWithIcon from './dataWithIcon'
+import moment from 'moment'
+import 'moment-duration-format'
 
 const StepTrackerPanel: FC = () => {
     const { state } = useFirebaseContext()
@@ -14,19 +16,27 @@ const StepTrackerPanel: FC = () => {
                 <div className={'pr-4 basis-1/2'}>
                     <CircularProgressbarWithChildren
                         styles={{ trail: { stroke: '#F7FAFF' }, path: { stroke: '#01CAFF' } }}
-                        value={(state.steps * 100) / 10000}
+                        value={(state.googleData.steps * 100) / 10000}
                         strokeWidth={6}
                     >
                         <div className={'flex flex-col justify-center items-center'}>
-                            <div className={'text-2xl font-bold text-primary'}>{state.steps}</div>
+                            <div className={'text-2xl font-bold text-primary'}>{state.googleData.steps}</div>
                             <div className={'text-wildBlue font-medium'}>steps</div>
                         </div>
                     </CircularProgressbarWithChildren>
                 </div>
                 <div className={'flex flex-col basis-1/2 gap-4 items-start justify-start'}>
-                    <DataWithIcon icon={'🏁'} title={'0.7km'} subTitle={'Distance'} />
-                    <DataWithIcon icon={'⏰'} title={'1h 3m'} subTitle={'Time spent'} />
-                    <DataWithIcon icon={'🔥'} title={'240 Cal'} subTitle={'Calories'} />
+                    <DataWithIcon
+                        icon={'🏁'}
+                        title={`${(state.googleData.distance / 1000).toFixed(2)}`}
+                        subTitle={'Distance'}
+                    />
+                    <DataWithIcon
+                        icon={'⏰'}
+                        title={moment.duration(state.googleData.activeMinutes, 'minutes').format('h [h] m [m]')}
+                        subTitle={'Time spent'}
+                    />
+                    <DataWithIcon icon={'🔥'} title={`${state.googleData.calories.toFixed(2)}`} subTitle={'Calories'} />
                 </div>
             </div>
         </InformationPanel>

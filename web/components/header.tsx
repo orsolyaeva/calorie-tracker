@@ -21,14 +21,14 @@ const MenuItem: FC<MenuItemProps> = ({ href, text }) => {
 }
 
 const Header: FC = () => {
-    const { state: firebase, login, logout } = useFirebaseContext()
+    const { state: firebase, login } = useFirebaseContext()
 
     return (
-        <header className="flex px-8 py-6 items-center justify-between">
+        <header className="flex px-8 py-6 items-center justify-between w-full">
             <Image src={'/logo.svg'} alt={'logo'} width={106} height={30} />
-            <nav className="flex gap-16">
+            <nav className="flex gap-16 h-8 items-center">
                 <MenuItem href={'/'} text={'Home'} />
-                <MenuItem href={'/tracker'} text={'Tracker'} />
+                <MenuItem href={'/dashboard'} text={'Dashboard'} />
                 <MenuItem href={'/blog'} text={'Blog'} />
                 <MenuItem href={'/about-us'} text={'About us'} />
             </nav>
@@ -46,13 +46,13 @@ const Header: FC = () => {
                             />
                         }
                     >
-                        <button onClick={logout}>Log out</button>
+                        <Link href={'/logout'}>Log out</Link>
                         <Link href={'/profile'}>Profile</Link>
                     </Dropdown>
                 ) : (
                     <button
                         className={
-                            'p-2 px-8 bg-blue-900 text-white uppercase text-sm tracking-widest font-medium rounded-3xl'
+                            'p-1.5 px-8 bg-blue-900 text-white uppercase text-sm tracking-widest font-medium rounded-3xl'
                         }
                         onClick={login}
                     >

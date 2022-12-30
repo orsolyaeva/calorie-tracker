@@ -2,9 +2,9 @@ import { FC } from 'react'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-type WorkoutEntryProps = { name: string; time: string; calories: string; type: string }
+type WorkoutEntryProps = { name: string; time: string; calories: string; type: string; onDelete: any }
 
-const WorkoutEntry: FC<WorkoutEntryProps> = ({ name, time, calories, type }) => {
+const WorkoutEntry: FC<WorkoutEntryProps> = ({ name, time, calories, type, onDelete }) => {
     return (
         <div className={'flex gap-6 w-full rounded-lg p-4 bg-lightBlue justify-between items-center'}>
             <div className={'flex flex-col'}>
@@ -16,7 +16,7 @@ const WorkoutEntry: FC<WorkoutEntryProps> = ({ name, time, calories, type }) => 
                     <div className={'text-secondary font-semibold text-base'}>{calories}</div>
                     <div className={'text-wildBlue text-xs font-medium'}>{type}</div>
                 </div>
-                <button>
+                <button onClick={onDelete}>
                     <FontAwesomeIcon icon={faTrash} className={'text-wildBlue text-lg'} />
                 </button>
             </div>
