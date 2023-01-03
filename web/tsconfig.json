@@ -16,7 +16,21 @@
     "incremental": true,
     "types": [
       "@types/moment-duration-format"
-    ]
+    ],
+    "baseUrl": "./",
+    "paths": {
+      "@services/*": ["./services/*"],
+      "@models/*": ["./models/*"],
+      "@components/*": ["./components/*"],
+      "@features/*": ["./features/*"],
+      "@styles/*": ["./styles/*"],
+      "@pages/*": ["./pages/*"],
+      "@hooks/*": ["./hooks/*"],
+      "@utils/*": ["./utils/*"],
+      "@stores/*": ["./stores/*"],
+      "@lib/*": ["./lib/*"],
+      "@/*": ["./*"]
+    }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]

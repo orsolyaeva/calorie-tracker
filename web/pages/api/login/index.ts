@@ -36,7 +36,13 @@ export default async function handler(
                 return res.status(400).json({message: "Invalid user"})
             }
 
-            return res.status(200).json(user)
+            const fullUser = await prisma.user.findUnique({
+                where: {
+                    id: user.id
+                },
+            });
+
+            return res.status(200).json(fullUser)
         }
     } catch (error: any) {
         return res.status(500).json({name: "", error: error.message})

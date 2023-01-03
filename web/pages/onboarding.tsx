@@ -1,26 +1,27 @@
+import { useUserStore } from '@stores/userStore'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { UserDataForm } from '../components/userDataForm'
-import { useFirebaseContext } from '../hooks/useFirebase'
 import { OnboardUser } from '../services/UserService'
 
 const Onboarding: NextPage = () => {
-    const { state } = useFirebaseContext()
+    // const { state, setUserIsLoaded, refetchAll } = useFirebaseContext();
+    const { user } = useUserStore((state) => state)
     const router = useRouter()
 
     useEffect(() => {
-        if (!state.user) return
-        console.log({ user: state.user })
-        if (state.user.finishedOnboarding) {
+        if (!user) return
+        console.log({ user })
+        if (user.finishedOnboarding) {
             router.push('/dashboard')
         }
-    }, [state.user])
+    }, [user])
 
     const onFormSubmitted = async (data: any) => {
         const result = await OnboardUser(data)
         if (result) {
-            router.push('/dashboard')
+            await router.push('/dashboard')
         }
     }
 

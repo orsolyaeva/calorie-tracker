@@ -1,29 +1,30 @@
 import moment from 'moment'
 import { FC, useEffect, useState } from 'react'
-import { useFirebaseContext } from '../hooks/useFirebase'
 import { Workout } from '../models/Workout'
 import { DeleteWorkout, GetWorkoutsForInterval } from '../services/WorkoutService'
 import { withPadding } from '../utils/constants'
 import InformationPanel from './informationPanel'
 import WorkoutEntry from './workoutEntry'
 import 'moment-duration-format'
-import { FormModal } from './formModal'
 import { WorkoutForm } from './workoutForm'
+import { useUserStore } from '@stores/userStore'
+import { useWorkoutStore } from '@stores/workoutStore'
 
 const WorkoutPanel: FC = () => {
+    const { caloriesBurned } = useWorkoutStore((state) => state)
     const [workouts, setWorkouts] = useState<Workout[]>([])
-    const [totalCalories, setTotalCalories] = useState<number>(0)
     const [totalTime, setTotalTime] = useState<number>(0)
-    const { state: firebase } = useFirebaseContext()
+    const { user } = useUserStore((state: any) => state)
     const [isOpen, setIsOpen] = useState(false)
     const openModal = () => setIsOpen(true)
 
     useEffect(() => {
+        if (!user?.id) return
         ;(async () => {
             const startDate = new Date()
             startDate.setHours(0, 0, 0, 0)
             const endDate = new Date()
-            const result = await GetWorkoutsForInterval(startDate, endDate, firebase.user.id)
+            const result = await GetWorkoutsForInterval(startDate, endDate, user.id)
 
             const total = result.reduce(
                 (acc, curr) => {
@@ -35,11 +36,11 @@ const WorkoutPanel: FC = () => {
                 { totalCalories: 0, totalTime: 0 }
             )
 
-            setTotalCalories(total.totalCalories)
+            useWorkoutStore.setState({ caloriesBurned: total.totalCalories })
             setTotalTime(total.totalTime)
             setWorkouts(result)
         })()
-    }, [firebase.user.id])
+    }, [user])
 
     const addWorkout = (workout: Workout) => {
         const newWorkouts = [...workouts, workout]
@@ -54,7 +55,7 @@ const WorkoutPanel: FC = () => {
             { totalCalories: 0, totalTime: 0 }
         )
 
-        setTotalCalories(total.totalCalories)
+        useWorkoutStore.setState({ caloriesBurned: total.totalCalories })
         setTotalTime(total.totalTime)
         setWorkouts(newWorkouts)
     }
@@ -74,7 +75,7 @@ const WorkoutPanel: FC = () => {
             { totalCalories: 0, totalTime: 0 }
         )
 
-        setTotalCalories(total.totalCalories)
+        useWorkoutStore.setState({ caloriesBurned: total.totalCalories })
         setTotalTime(total.totalTime)
         setWorkouts(newWorkouts)
     }
@@ -85,7 +86,7 @@ const WorkoutPanel: FC = () => {
             icon={'/workout.png'}
             headerChild={
                 <div className={'flex flex-col items-end'}>
-                    <div className={'text-sm text-primary font-semibold'}>{totalCalories} cal</div>
+                    <div className={'text-sm text-primary font-semibold'}>{caloriesBurned} cal</div>
                     <div className={'text-xs text-wildBlue font-regular'}>
                         {moment.duration(totalTime, 'seconds').format('h [h] m [m] s [s]')}
                     </div>
