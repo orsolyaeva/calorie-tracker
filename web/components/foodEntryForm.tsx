@@ -28,6 +28,7 @@ export const FoodEntryForm : FC<FoodEntryFormProps> = ({isOpen, setIsOpen, submi
     const [lastDecodedText, setLastDecodedText] = useState<string>('');
     
     const lastDecodedTextRef = useRef(lastDecodedText);
+    const closeModal = () => setIsOpen(false);
 
     useEffect(() => {
         if (entry && defaultValues.calories === 0) {
@@ -102,6 +103,7 @@ export const FoodEntryForm : FC<FoodEntryFormProps> = ({isOpen, setIsOpen, submi
         if (!entry) {
             reset(defaultValues);
         }
+        closeModal();
     }
     
     return (

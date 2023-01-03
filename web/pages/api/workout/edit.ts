@@ -31,7 +31,7 @@ export default async function handler(
                 return res.status(400).json({message: "Invalid calories burned"})
             }
 
-            if(!duration || isNaN(parseInt(duration)) || parseInt(duration) <= 0) {
+            if(!duration || isNaN(parseFloat(duration)) || parseFloat(duration) <= 0) {
                 return res.status(400).json({message: "Invalid duration"})
             }
 
@@ -62,7 +62,7 @@ export default async function handler(
                 data: {
                     name,
                     caloriesBurned: parseInt(caloriesBurned),
-                    duration: parseInt(duration),
+                    duration: parseFloat(duration),
                     workoutCategory: {
                         connect: {
                             id: parseInt(workoutCategoryId)

@@ -20,6 +20,7 @@ export const SleepForm : FC<{isOpen: boolean, setIsOpen: any, setSleep: any, ent
     const { register, handleSubmit, reset } = useForm<SleepFormInput>({
         defaultValues,
     });
+    const closeModal = () => setIsOpen(false);
 
     useEffect(() => {
         if (entry && defaultValues.duration === 0) {
@@ -52,6 +53,7 @@ export const SleepForm : FC<{isOpen: boolean, setIsOpen: any, setSleep: any, ent
             reset(defaultValues);
             setSleep(sleepEntry);
         }
+        closeModal();
     }
     
     return (
