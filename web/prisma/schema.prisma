@@ -64,7 +64,7 @@ model WorkoutEntry {
   user              User            @relation(fields: [userId], references: [id])
   userId            Int
   caloriesBurned    Int
-  duration          Int
+  duration          Float
   completedAt       DateTime        @default(now())
 }
 
