@@ -9,7 +9,11 @@ export default async function handler(
 ) {
     try {
         if (req.method === 'GET') {
-            const meals = await prisma.meal.findMany()
+            const meals = await prisma.meal.findMany({
+                include: {
+                    foodEntries: true
+                }
+            })
 
             if(!meals || meals.length === 0) {
                 return res.status(404).json({message: "Meals not found or empty"})

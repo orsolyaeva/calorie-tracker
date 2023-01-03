@@ -1,16 +1,24 @@
 import { NextPage } from 'next'
 import { useEffect } from 'react'
-import { useFirebaseContext } from '../hooks/useFirebase'
 import { useRouter } from 'next/router'
+import { useUserStore } from '@stores/userStore'
+import { useFirebaseStore } from '@stores/firebaseStore'
+import { signOut } from 'firebase/auth'
 
 const Logout: NextPage = () => {
-    const { logout } = useFirebaseContext()
+    const { user } = useUserStore((state: any) => state)
+    const { auth } = useFirebaseStore((state: any) => state)
     const router = useRouter()
 
     useEffect(() => {
-        logout()
-        router.push('/')
+        ;(async () => {
+            console.log('You are logged out!')
+            await signOut(auth)
+            useUserStore.setState({ user: null, accessToken: null, isLoading: false })
+            router.push('/')
+        })()
     }, [])
+
     return <></>
 }
 

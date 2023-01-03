@@ -1,6 +1,6 @@
+import { useUserStore } from '@stores/userStore'
 import { FC } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { useFirebaseContext } from '../hooks/useFirebase'
 import { FormInput, FormSelect } from './formComponents'
 
 type OnboardingFormInput = {
@@ -17,7 +17,7 @@ export const UserDataForm: FC<{ defaultValues?: any; onFormSubmitted: any }> = (
     const { register, handleSubmit, reset, control } = useForm<OnboardingFormInput>({
         defaultValues: defaultValues || {},
     })
-    const { state } = useFirebaseContext()
+    const { user } = useUserStore((state) => state)
 
     const onSubmit: SubmitHandler<OnboardingFormInput> = async (data) => {
         const goalDate = new Date()
@@ -34,7 +34,7 @@ export const UserDataForm: FC<{ defaultValues?: any; onFormSubmitted: any }> = (
             activityLevel: data.activityLevel,
             weeklyGoal: data.weeklyGoal,
             goalDate: goalDate,
-            userId: state.user.id,
+            userId: user.id,
         }
 
         return onFormSubmitted(onboardingData)

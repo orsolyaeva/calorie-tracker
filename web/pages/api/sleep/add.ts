@@ -9,14 +9,18 @@ export default async function handler(
 ) {
     try {
         if (req.method === 'POST') {
-            const {userId, duration} = req.body
+            const {userId, duration, completedAt} = req.body
 
             if(!userId || isNaN(parseInt(userId))) {
                 return res.status(400).json({message: "Invalid user id"})
             }
 
-            if(!duration || isNaN(parseInt(duration)) || parseInt(duration) <= 0) {
+            if(!duration || isNaN(parseFloat(duration)) || parseFloat(duration) <= 0) {
                 return res.status(400).json({message: "Invalid sleep duration"})
+            }
+
+            if(!completedAt || !validator.isISO8601(completedAt)) {
+                return res.status(400).json({message: "Invalid completed at date"})
             }
 
             const user = await prisma.user.findUnique({
@@ -36,7 +40,8 @@ export default async function handler(
                             id: parseInt(userId)
                         }
                     },
-                    duration: parseInt(duration),
+                    duration: parseFloat(duration),
+                    completedAt: new Date(completedAt)
                 }
             })
 

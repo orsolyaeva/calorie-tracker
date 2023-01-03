@@ -133,7 +133,10 @@ export const useFirebaseState = (): FirebaseStore => {
 
                     if (!user.finishedOnboarding) {
                         dispatch({ type: FIREBASE_ACTIONS.SET_USER, payload: combinedUser })
-                        router.push('/onboarding')
+                        dispatch({
+                            type: FIREBASE_ACTIONS.SIGN_IN,
+                            payload: { user: combinedUser, accessToken: accessToken },
+                        })
                         return
                     }
                 }
