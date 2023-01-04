@@ -13,13 +13,18 @@ type OnboardingFormInput = {
     weeklyGoal: number
 }
 
-export const UserDataForm: FC<{ defaultValues?: any; onFormSubmitted: any }> = ({ defaultValues, onFormSubmitted }) => {
+export const UserDataForm: FC<{ defaultValues?: any; onFormSubmitted: any; className?: string }> = ({
+    defaultValues,
+    onFormSubmitted,
+    className = '',
+}) => {
     const { register, handleSubmit, reset, control } = useForm<OnboardingFormInput>({
         defaultValues: defaultValues || {},
     })
     const { user } = useUserStore((state) => state)
 
     const onSubmit: SubmitHandler<OnboardingFormInput> = async (data) => {
+        if (!user) return
         const goalDate = new Date()
         const amountOfWeeks = (data.currentWeight - data.goalWeight) / data.weeklyGoal
         goalDate.setDate(goalDate.getDate() + amountOfWeeks * 7)
@@ -41,7 +46,7 @@ export const UserDataForm: FC<{ defaultValues?: any; onFormSubmitted: any }> = (
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} className={className}>
             <FormInput
                 inputProps={register('currentWeight', {
                     required: 'This is required',

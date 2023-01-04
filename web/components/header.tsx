@@ -9,6 +9,11 @@ import { getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signInWithRe
 import { LoginUser, LoginUserByEmail } from '@services/UserService'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { useDateStore } from '@stores/dateStore'
+import { GetGoogleData } from '@services/GoogleDataService'
+import { GetWaterIntakeForInterval } from '@services/WaterIntakeService'
+import { useGoogleDataStore } from '@stores/googleDataStore'
+import { useWaterIntakeStore } from '@stores/waterIntakeStore'
 
 type MenuItemProps = { href: string; text: string; className?: string }
 
@@ -48,7 +53,7 @@ if (typeof window !== 'undefined') {
 }
 
 const Header: FC = () => {
-    const { user } = useUserStore((state: any) => state)
+    const { user, accessToken, dataLoaded, isLoading } = useUserStore((state: any) => state)
     const { auth, authProvider } = useFirebaseStore((state: any) => state)
     const router = useRouter()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -86,6 +91,27 @@ const Header: FC = () => {
             }
         })()
     }, [])
+
+    useEffect(() => {
+        if (!accessToken) return
+        ;(async () => {
+            const startDate = new Date()
+            startDate.setHours(0, 0, 0, 0)
+            const endDate = new Date()
+            useDateStore.setState({ startDate, endDate })
+
+            try {
+                const googleData = await GetGoogleData(startDate, endDate, accessToken)
+                useGoogleDataStore.setState(googleData)
+            } catch (e) {
+                router.push('/logout')
+            }
+            const waterIntake = await GetWaterIntakeForInterval(startDate, endDate, user.id)
+            useWaterIntakeStore.setState({ amount: waterIntake })
+
+            useUserStore.setState({ dataLoaded: true })
+        })()
+    }, [accessToken])
 
     return (
         <header className="sticky top-0 z-10 md:static">
