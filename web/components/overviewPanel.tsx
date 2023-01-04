@@ -56,8 +56,8 @@ const OverviewPanel: FC = () => {
 
     return (
         <div className={'flex flex-col gap-6 w-full rounded-xl border-[1px] p-4'}>
-            <div className={'flex justify-between items-center'}>
-                <div className={'pr-1 basis-1/5'}>
+            <div className={'flex justify-between items-center md:flex-row flex-col'}>
+                <div className={'pr-1 md:basis-1/5 h-48 w-48 md:h-full md:w-full'}>
                     <CircularProgressbarWithChildren
                         styles={{ trail: { stroke: '#F7FAFF' }, path: { stroke: '#00b158' } }}
                         value={(caloriesConsumed * 100) / (goal + caloriesBurned)}
@@ -72,11 +72,11 @@ const OverviewPanel: FC = () => {
                     </CircularProgressbarWithChildren>
                 </div>
                 <div className={'flex w-full flex-col justify-center basis-4/5 gap-8 px-4 pr-2'}>
-                    <div className={'flex justify-between items-center'}>
+                    <div className={'flex justify-between items-center md:flex-row flex-col'}>
                         <div className={'text-base text-primary font-semibold'}>Calorie tracker details</div>
                         <div className={'text-base text-wildBlue font-medium'}>Remaining = Goal - Food + Exercise</div>
                     </div>
-                    <div className={'flex flex gap-4 items-start justify-between'}>
+                    <div className={'flex flex gap-4 items-start justify-between md:flex-row flex-col'}>
                         <DataWithIcon icon={'🎯'} title={`${goal} Cal`} subTitle={'Base Goal'} />
                         <DataWithIcon icon={'🍳'} title={`${caloriesConsumed} Cal`} subTitle={'Food'} />
                         <DataWithIcon icon={'🔥'} title={`${caloriesBurned} Cal`} subTitle={'Exercise'} />

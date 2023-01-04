@@ -63,7 +63,7 @@ const MealPanel: FC<MealPanelProps> = ({ meal }) => {
             />
             <div className={'flex justify-between items-center'}>
                 <DataWithIcon icon={meal.icon} title={meal.name} subTitle={`${totalCalories} cal`} />
-                <button onClick={openModal}>
+                <button onClick={openModal} aria-label={`Add ${meal.name} entry`}>
                     <FontAwesomeIcon icon={faCirclePlus} className={'text-primary text-3xl'} />
                 </button>
             </div>

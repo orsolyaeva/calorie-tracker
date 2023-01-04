@@ -33,6 +33,7 @@ const WaterIntakePanel: FC = () => {
                     onClick={() => {
                         RemoveGlassOfWater(user.id)
                     }}
+                    aria-label="Remove glass of water"
                 >
                     <FontAwesomeIcon icon={faCircleMinus} className={'text-secondary text-xl'} />
                 </button>
@@ -41,6 +42,7 @@ const WaterIntakePanel: FC = () => {
                     onClick={() => {
                         AddGlassOfWater(user.id)
                     }}
+                    aria-label="Add glass of water"
                 >
                     <FontAwesomeIcon icon={faCirclePlus} className={'text-secondary text-xl'} />
                 </button>

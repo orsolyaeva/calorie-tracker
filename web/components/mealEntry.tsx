@@ -52,10 +52,10 @@ const MealEntry: FC<MealEntryProps> = ({ meal, foodEntry, onUpdate, onDelete }) 
                 <div className={'text-wildBlue text-xs font-medium'}>{`${foodEntry.calories} calories`}</div>
             </div>
             <div className={'flex items-center justify-center gap-6'}>
-                <button onClick={openModal}>
+                <button onClick={openModal} aria-label={`Edit ${meal.name}`}>
                     <FontAwesomeIcon icon={faSquarePen} className={'text-wildBlue text-lg'} />
                 </button>
-                <button onClick={onDelete}>
+                <button onClick={onDelete} aria-label={`Remove ${meal.name}`}>
                     <FontAwesomeIcon icon={faTrash} className={'text-wildBlue text-lg'} />
                 </button>
             </div>
