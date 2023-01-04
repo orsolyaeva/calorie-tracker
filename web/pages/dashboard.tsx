@@ -38,7 +38,7 @@ const Dashboard: FC = () => {
                 <link rel="icon" href="/leaf.png" />
             </Head>
 
-            <main>
+            <main className="md:block hidden">
                 <DashboardLayout>
                     <SideColumn>
                         <StepTrackerPanel />
@@ -47,7 +47,7 @@ const Dashboard: FC = () => {
                     <MainColumn>
                         <div className={'flex justify-between'}>
                             <div className={'text-primary font-semibold text-xl'}>Today's overview</div>
-                            <div className={'text-wildBlue font-medium text-base'}>
+                            <div className={'text-wildBlue font-medium text-base text-right md:text-left'}>
                                 {moment(new Date()).format('Do [of] MMMM YYYY')}
                             </div>
                         </div>
@@ -61,13 +61,31 @@ const Dashboard: FC = () => {
                         <WorkoutPanel />
                     </SideColumn>
                 </DashboardLayout>
-                {/*{!loading ? (*/}
-                {/*    <h1 className={styles.title}>*/}
-                {/*        You have made <strong style={{color: 'emerald'}}>{steps}</strong> steps today!*/}
-                {/*    </h1>*/}
-                {/*) : (<ClipLoader color="#36d7b7" />)}*/}
+            </main>
 
-                {/*{firebase.user ? <button onClick={logout}>Log out</button> : <button onClick={login}>Log in</button>}*/}
+            <main className="md:hidden block">
+                <DashboardLayout>
+                    <MainColumn>
+                        <div className={'flex justify-between'}>
+                            <div className={'text-primary font-semibold text-xl'}>Today's overview</div>
+                            <div className={'text-wildBlue font-medium text-base text-right md:text-left'}>
+                                {moment(new Date()).format('Do [of] MMMM YYYY')}
+                            </div>
+                        </div>
+                        <OverviewPanel />
+                        {meals.map((meal, index) => (
+                            <MealPanel key={`meal_${index}_${meal.name}`} meal={meal} />
+                        ))}
+                    </MainColumn>
+                    <SideColumn>
+                        <StepTrackerPanel />
+                        <WaterIntakePanel />
+                    </SideColumn>
+                    <SideColumn>
+                        <SleepLogPanel />
+                        <WorkoutPanel />
+                    </SideColumn>
+                </DashboardLayout>
             </main>
         </AuthWrapper>
     )

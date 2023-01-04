@@ -1,30 +1,29 @@
-import { useUserStore } from "@stores/userStore";
-import { NextPage } from "next";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
-import { UserDataForm } from "../components/userDataForm";
-import { OnboardUser } from "../services/UserService";
+import { useUserStore } from '@stores/userStore'
+import { NextPage } from 'next'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
+import { UserDataForm } from '../components/userDataForm'
+import { OnboardUser } from '../services/UserService'
 
-const Onboarding : NextPage = () => {
-    // const { state, setUserIsLoaded, refetchAll } = useFirebaseContext();
-    const { user } = useUserStore((state) => state);
-    const router = useRouter();
+const Onboarding: NextPage = () => {
+    const { user } = useUserStore((state) => state)
+    const router = useRouter()
 
     useEffect(() => {
-        if (!user) return;
-        console.log({user});
+        if (!user) return
+        console.log({ user })
         if (user.finishedOnboarding) {
-            router.push('/dashboard');
+            router.push('/dashboard')
         }
-    }, [user]);
+    }, [user])
 
     const onFormSubmitted = async (data: any) => {
-        const result = await OnboardUser(data);
+        const result = await OnboardUser(data)
         if (result) {
-            await router.push('/dashboard');
+            await router.push('/dashboard')
         }
     }
-    
+
     return (
         <div className="flex justify-center w-full">
             <UserDataForm onFormSubmitted={onFormSubmitted} className="flex flex-col px-8 gap-2 w-1/2" />

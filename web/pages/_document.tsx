@@ -6,19 +6,19 @@ class MyDocument extends Document {
     }
     render() {
         return (
-            <Html>
+            <Html lang="en">
                 <Head>
-                    <link rel="preconnect" href="https://fonts.googleapis.com" />
+                    {/* <link rel="preconnect" href="https://fonts.googleapis.com" />
                     <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin={'anonymous'} />
                     <link
                         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-                        rel="stylesheet"
-                    />
+                        rel="preload"
+                        as="style"
+                    /> */}
                 </Head>
                 <body>
                     <Main />
                     <NextScript />
-                    <script src="https://apis.google.com/js/api.js"></script>
                 </body>
             </Html>
         )
